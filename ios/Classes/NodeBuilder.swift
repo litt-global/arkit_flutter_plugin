@@ -39,11 +39,16 @@ fileprivate func createReferenceNode(_ dict: Dictionary<String, Any>) -> SCNRefe
     var referenceUrl: URL
     if let bundleURL = Bundle.main.url(forResource: url, withExtension: nil){
         referenceUrl = bundleURL
+    }else if url.starts(with: "http"){
+        referenceUrl = URL(string: url)!
     }else{
         referenceUrl = URL(fileURLWithPath: url)
     }
+    
     let node = SCNReferenceNode(url: referenceUrl)
-    node?.load()
+    DispatchQueue.global(qos: .background).async {
+        node?.load()
+    }
     return node!
 }
 
