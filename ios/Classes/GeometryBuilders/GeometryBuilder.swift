@@ -81,19 +81,19 @@ fileprivate func parseMaterial(_ dict: Dictionary<String, Any>) -> SCNMaterial {
     material.blendMode = SCNBlendMode.init(rawValue: dict["blendMode"] as! Int)!
     material.isDoubleSided = dict["doubleSided"] as! Bool
     
-    material.diffuse.contents = parsePropertyContents(dict["diffuse"])
-    material.ambient.contents = parsePropertyContents(dict["ambient"])
-    material.specular.contents = parsePropertyContents(dict["specular"])
-    material.emission.contents = parsePropertyContents(dict["emission"])
-    material.transparent.contents = parsePropertyContents(dict["transparent"])
-    material.reflective.contents = parsePropertyContents(dict["reflective"])
-    material.multiply.contents = parsePropertyContents(dict["multiply"])
-    material.normal.contents = parsePropertyContents(dict["normal"])
-    material.displacement.contents = parsePropertyContents(dict["displacement"])
-    material.ambientOcclusion.contents = parsePropertyContents(dict["ambientOcclusion"])
-    material.selfIllumination.contents = parsePropertyContents(dict["selfIllumination"])
-    material.metalness.contents = parsePropertyContents(dict["metalness"])
-    material.roughness.contents = parsePropertyContents(dict["roughness"])
+    material.diffuse.contents = parsePropertyContents(dict["diffuse"], material.diffuse)
+    material.ambient.contents = parsePropertyContents(dict["ambient"], material.ambient)
+    material.specular.contents = parsePropertyContents(dict["specular"], material.specular)
+    material.emission.contents = parsePropertyContents(dict["emission"], material.emission)
+    material.transparent.contents = parsePropertyContents(dict["transparent"], material.transparent)
+    material.reflective.contents = parsePropertyContents(dict["reflective"], material.reflective)
+    material.multiply.contents = parsePropertyContents(dict["multiply"], material.multiply)
+    material.normal.contents = parsePropertyContents(dict["normal"], material.normal)
+    material.displacement.contents = parsePropertyContents(dict["displacement"], material.displacement)
+    material.ambientOcclusion.contents = parsePropertyContents(dict["ambientOcclusion"], material.ambientOcclusion)
+    material.selfIllumination.contents = parsePropertyContents(dict["selfIllumination"], material.selfIllumination)
+    material.metalness.contents = parsePropertyContents(dict["metalness"], material.metalness)
+    material.roughness.contents = parsePropertyContents(dict["roughness"], material.roughness)
     
     return material
 }
@@ -141,13 +141,23 @@ fileprivate func parseColorBufferWriteMask(_ mode: Int?) -> SCNColorMask {
     }
 }
 
-fileprivate func parsePropertyContents(_ dict: Any?) -> Any? {
+fileprivate func parsePropertyContents(_ dict: Any?, _ materialProperty: SCNMaterialProperty) -> Any? {
     guard let dict = dict as? Dictionary<String, Any> else {
         return nil
     }
     
     if let imageName = dict["image"] as? String {
-        return getImageByName(imageName)
+        let isGif = dict["isGif"] as? Bool
+        let isVideo = dict["isVideo"] as? Bool
+        
+        if isGif! {
+            return getGifByName(imageName)
+        } else if isVideo! {
+            materialProperty.contentsTransform = SCNMatrix4Translate(SCNMatrix4MakeScale(1, -1, 1), 0, 1, 0)
+            return getVideoByName(imageName)
+        } else {
+            return getImageByName(imageName)
+        }
     }
     if let color = dict["color"] as? Int {
         return UIColor(rgb: UInt(color))

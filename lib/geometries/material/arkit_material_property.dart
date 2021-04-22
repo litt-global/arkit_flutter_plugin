@@ -9,7 +9,7 @@ part 'arkit_material_property.g.dart';
 /// This can be used to specify the various properties of SCNMaterial slots such as diffuse, ambient, etc.
 @JsonSerializable()
 class ARKitMaterialProperty {
-  ARKitMaterialProperty({this.color, this.image, this.url});
+  ARKitMaterialProperty({this.color, this.image, this.url, this.isGif, this.isVideo});
 
   /// Specifies the receiver's color.
   @ColorConverter()
@@ -21,6 +21,9 @@ class ARKitMaterialProperty {
   /// or URL
   /// or base64 string (highly not recommended due to potential performance issues)
   final String image;
+
+  final bool isGif;
+  final bool isVideo;
 
   /// Specifies the location of an image file
   /// Deprecated: use image field instead
