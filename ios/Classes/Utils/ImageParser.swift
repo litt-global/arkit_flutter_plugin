@@ -56,24 +56,10 @@ func getVideoByName(_ name: String) -> SKScene {
     return videoScene
 }
 
-func RGBtoHSV(r : Float, g : Float, b : Float) -> (h : Float, s : Float, v : Float) {
-    var h : CGFloat = 0
-    var s : CGFloat = 0
-    var v : CGFloat = 0
-    let col = UIColor(red: CGFloat(r), green: CGFloat(g), blue: CGFloat(b), alpha: 1.0)
-    col.getHue(&h, saturation: &s, brightness: &v, alpha: nil)
-    return (Float(h), Float(s), Float(v))
-}
-
 func colorCubeFilterForChromaKey(hueAngle: Float) -> CIFilter {
-    let hueRange: Float = 20 // degrees size pie shape that we want to replace
-    let minHueAngle: Float = (hueAngle - hueRange/2.0) / 360
-    let maxHueAngle: Float = (hueAngle + hueRange/2.0) / 360
-
     let size = 64
     var cubeData = [Float](repeating: 0, count: size * size * size * 4)
     var rgb: [Float] = [0, 0, 0]
-    var hsv: (h : Float, s : Float, v : Float)
     var offset = 0
 
     for z in 0 ..< size {
@@ -81,16 +67,14 @@ func colorCubeFilterForChromaKey(hueAngle: Float) -> CIFilter {
         for y in 0 ..< size {
             rgb[1] = Float(y) / Float(size) // green value
             for x in 0 ..< size {
-
                 rgb[0] = Float(x) / Float(size) // red value
-                hsv = RGBtoHSV(r: rgb[0], g: rgb[1], b: rgb[2])
-                // TODO: Check if hsv.s > 0.5 is really nesseccary
-                let alpha: Float = (hsv.h > minHueAngle && hsv.h < maxHueAngle && hsv.s > 0.5) ? 0 : 1.0
-
-                cubeData[offset] = rgb[0] * alpha
-                cubeData[offset + 1] = rgb[1] * alpha
-                cubeData[offset + 2] = rgb[2] * alpha
-                cubeData[offset + 3] = alpha
+                
+                let r: [Float] = removeChromaKeyColor(r: rgb[0], g: rgb[1], b: rgb[2])
+                
+                cubeData[offset] = r[0]
+                cubeData[offset + 1] = r[1]
+                cubeData[offset + 2] = r[2]
+                cubeData[offset + 3] = r[3]
                 offset += 4
             }
         }
@@ -103,6 +87,30 @@ func colorCubeFilterForChromaKey(hueAngle: Float) -> CIFilter {
         "inputCubeData": data
         ])
     return colorCube!
+}
+
+func removeChromaKeyColor(r: Float, g: Float, b: Float) -> [Float] {
+    let threshold: Float = 0.1
+    let refColor: [Float] = [0, 1.0, 0, 1.0]    // chroma key color
+
+    //http://www.shaderslab.com/demo-40---video-in-video-with-green-chromakey.html
+    let val = ceil(saturate(g - r - threshold)) * ceil(saturate(g - b - threshold))
+    var result = lerp(a: [r, g, b, 0.0], b: refColor, w: val)
+    result[3] = abs(1.0 - result[3])
+
+    return result
+}
+
+func saturate(_ x: Float) -> Float {
+    return max(0, min(1, x));
+}
+
+func ceil(_ v: Float) -> Float {
+    return -floor(-v);
+}
+
+func lerp(a: [Float], b: [Float], w: Float) -> [Float] {
+    return [a[0]+w*(b[0]-a[0]), a[1]+w*(b[1]-a[1]), a[2]+w*(b[2]-a[2]), a[3]+w*(b[3]-a[3])];
 }
 
 //
