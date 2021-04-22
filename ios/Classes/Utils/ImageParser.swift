@@ -39,15 +39,15 @@ func getVideoByName(_ name: String) -> SKScene {
     videoNode.size = size
     videoNode.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
 
-//    // chroma
-//    let effectNode = SKEffectNode()
-//    effectNode.addChild(videoNode)
-//
-
+    // chroma
+    let effectNode = SKEffectNode()
+    effectNode.filter = colorCubeFilterForChromaKey(hueAngle: 114)
+    effectNode.addChild(videoNode)
+    
     // setup the SKScene that will house the node
     let videoScene = SKScene(size: size)
-    videoScene.addChild(videoNode)
-    videoScene.filter = colorCubeFilterForChromaKey(hueAngle: 114)
+    videoScene.backgroundColor = UIColor.clear
+    videoScene.addChild(effectNode)
     
     // play video
     player.play()
