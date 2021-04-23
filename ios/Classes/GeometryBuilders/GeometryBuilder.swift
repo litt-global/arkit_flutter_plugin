@@ -149,12 +149,13 @@ fileprivate func parsePropertyContents(_ dict: Any?, _ materialProperty: SCNMate
     if let imageName = dict["image"] as? String {
         let isGif = dict["isGif"] as? Bool
         let isVideo = dict["isVideo"] as? Bool
+        let chromaColor = dict["chromaColor"] as? Int
         
-        if isGif! {
+        if isGif == true {
             return getGifByName(imageName)
-        } else if isVideo! {
+        } else if isVideo == true {
             materialProperty.contentsTransform = SCNMatrix4Translate(SCNMatrix4MakeScale(1, -1, 1), 0, 1, 0)
-            return getVideoByName(imageName)
+            return getVideoByName(imageName, chromaColor)
         } else {
             return getImageByName(imageName)
         }

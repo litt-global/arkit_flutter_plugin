@@ -28,10 +28,10 @@ func getGifByName(_ name: String) -> CALayer {
     return gifImageView.layer
 }
 
-func getVideoByName(_ name: String) -> SKScene {
+func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
     let asset = AVURLAsset(url: URL(string: name)!)
     let size = asset.tracks(withMediaType: AVMediaType.video)[0].naturalSize
-
+    
     let player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
 
     // setup the video SKVideoNode
@@ -40,14 +40,17 @@ func getVideoByName(_ name: String) -> SKScene {
     videoNode.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
 
     // chroma
-    let effectNode = SKEffectNode()
-    effectNode.filter = colorCubeFilterForChromaKey(hueAngle: 114)
-    effectNode.addChild(videoNode)
+    var effectNode: SKEffectNode? = nil
+    if (chromaColor != nil) {
+        effectNode = SKEffectNode()
+        effectNode?.filter = colorCubeFilterForChromaKey(hueAngle: 114)
+        effectNode?.addChild(videoNode)
+    }
     
     // setup the SKScene that will house the node
     let videoScene = SKScene(size: size)
     videoScene.backgroundColor = UIColor.clear
-    videoScene.addChild(effectNode)
+    videoScene.addChild(effectNode ?? videoNode)
     
     // play video
     player.play()

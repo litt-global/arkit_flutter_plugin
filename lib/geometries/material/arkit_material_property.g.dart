@@ -14,6 +14,7 @@ ARKitMaterialProperty _$ARKitMaterialPropertyFromJson(
     url: json['url'] as String,
     isGif: json['isGif'] as bool,
     isVideo: json['isVideo'] as bool,
+    chromaColor: const ColorConverter().fromJson(json['chromaColor'] as int),
   );
 }
 
@@ -32,5 +33,6 @@ Map<String, dynamic> _$ARKitMaterialPropertyToJson(
   val['url'] = instance.url;
   val['isGif'] = instance.isGif;
   val['isVideo'] = instance.isVideo;
+  val['chromaColor'] = instance.chromaColor == null ? null : ColorConverter().toJson(instance.chromaColor);
   return val;
 }
