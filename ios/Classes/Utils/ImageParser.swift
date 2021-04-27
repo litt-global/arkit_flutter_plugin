@@ -30,15 +30,26 @@ func getGifByName(_ name: String) -> CALayer {
 
 func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
     let asset = AVURLAsset(url: URL(string: name)!)
-    let size = asset.tracks(withMediaType: AVMediaType.video)[0].naturalSize
+    let naturalSize = asset.tracks(withMediaType: AVMediaType.video)[0].naturalSize
+    let transform = asset.tracks(withMediaType: AVMediaType.video)[0].preferredTransform
+    let videoAngleInDegree = atan2(transform.b, transform.a) * 180 / .pi
+    
+    var size = naturalSize
+    if (videoAngleInDegree == 90 || videoAngleInDegree == 270) {
+        size = CGSize(width: naturalSize.height, height: naturalSize.width)
+    }
     
     let player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
 
+    // loop the video
+    _ = VideoLooper(player)
+    
     // setup the video SKVideoNode
     let videoNode = SKVideoNode(avPlayer: player)
     videoNode.size = size
-    videoNode.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
-
+    videoNode.position = CGPoint(x: naturalSize.width * 0.5, y: naturalSize.height * 0.5)
+    videoNode.zRotation = CGFloat(-videoAngleInDegree) * .pi / 180
+    
     // chroma
     var effectNode: SKEffectNode? = nil
     if (chromaColor != nil) {
@@ -48,8 +59,9 @@ func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
     }
     
     // setup the SKScene that will house the node
-    let videoScene = SKScene(size: size)
+    let videoScene = SKScene(size: naturalSize)
     videoScene.backgroundColor = UIColor.clear
+    videoScene.scaleMode = .aspectFit
     videoScene.addChild(effectNode ?? videoNode)
     
     // play video
@@ -57,6 +69,23 @@ func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
     videoNode.play()
     
     return videoScene
+}
+
+class VideoLooper {
+    var playerObserver: Any?
+    
+    init(_ player: AVPlayer) {
+        player.actionAtItemEnd = .none
+
+        playerObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+            object: player.currentItem,
+            queue: nil) { notification in
+                if let playerItem: AVPlayerItem = notification.object as? AVPlayerItem {
+                    playerItem.seek(to: CMTime.zero, completionHandler: nil)
+                }
+            }
+    }
 }
 
 func colorCubeFilterForChromaKey(hueAngle: Float) -> CIFilter {
