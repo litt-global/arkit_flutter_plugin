@@ -1,4 +1,5 @@
 import 'package:arkit_plugin/arkit_node.dart';
+import 'package:arkit_plugin/geometries/arkit_anchor.dart';
 import 'package:arkit_plugin/light/arkit_light.dart';
 import 'package:arkit_plugin/physics/arkit_physics_body.dart';
 import 'package:flutter/widgets.dart';
@@ -8,6 +9,7 @@ import 'package:vector_math/vector_math_64.dart';
 class ARKitReferenceNode extends ARKitNode {
   ARKitReferenceNode({
     @required this.url,
+    ARKitAnchor anchor,
     ARKitPhysicsBody physicsBody,
     ARKitLight light,
     Vector3 position,
@@ -17,6 +19,7 @@ class ARKitReferenceNode extends ARKitNode {
     int renderingOrder,
     bool isHidden,
   }) : super(
+          anchor: anchor,
           physicsBody: physicsBody,
           light: light,
           position: position,

@@ -1,4 +1,5 @@
 import 'package:arkit_plugin/geometries/arkit_geometry.dart';
+import 'package:arkit_plugin/geometries/arkit_anchor.dart';
 import 'package:arkit_plugin/light/arkit_light.dart';
 import 'package:arkit_plugin/physics/arkit_physics_body.dart';
 import 'package:arkit_plugin/utils/json_converters.dart';
@@ -12,6 +13,7 @@ import 'package:vector_math/vector_math_64.dart';
 /// The coordinate systems of all the sub-nodes are relative to the one of their parent node.
 class ARKitNode {
   ARKitNode({
+    this.anchor,
     this.geometry,
     this.physicsBody,
     this.light,
@@ -27,6 +29,9 @@ class ARKitNode {
         isHidden = ValueNotifier(isHidden),
         transformNotifier = ValueNotifier(createTransformMatrix(
             transformation, position, scale, rotation, eulerAngles));
+
+  /// Anchor of this node
+  final ARKitAnchor anchor;
 
   /// Returns the geometry attached to the receiver.
   final ARKitGeometry geometry;
@@ -48,6 +53,14 @@ class ARKitNode {
     final newT = old.clone();
     newT.setTranslation(value);
     transform = newT;
+  }
+
+  /// Determines the receiver's world position
+  Vector3 get worldPosition {
+    if (anchor == null) return position;
+
+    final anchorPosition = anchor.transform.getColumn(3);
+    return Vector3(anchorPosition.x, anchorPosition.y, anchorPosition.z);
   }
 
   /// Determines the receiver's scale.
