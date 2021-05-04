@@ -28,7 +28,7 @@ func getGifByName(_ name: String) -> CALayer {
     return gifImageView.layer
 }
 
-func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
+func getVideoByName(_ name: String, _ isMuted: Bool, _ chromaColor: Int?) -> SKScene {
     let asset = AVURLAsset(url: URL(string: name)!)
     let naturalSize = asset.tracks(withMediaType: AVMediaType.video)[0].naturalSize
     let transform = asset.tracks(withMediaType: AVMediaType.video)[0].preferredTransform
@@ -40,7 +40,8 @@ func getVideoByName(_ name: String, _ chromaColor: Int?) -> SKScene {
     }
     
     let player = AVPlayer(playerItem: AVPlayerItem(asset: asset))
-
+    player.isMuted = isMuted
+    
     // loop the video
     _ = VideoLooper(player)
     
